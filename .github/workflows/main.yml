@@ -1,9 +1,9 @@
-name: Deploy MkDocs to GitHub Pages
+name: Deploy Vite to GitHub Pages
 
 on:
   push:
-    branches: ["main"]
-  workflow_dispatch:
+    branches:
+      - main
 
 permissions:
   contents: read
@@ -11,44 +11,35 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: pages
   cancel-in-progress: true
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Descargar repositorio
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
         with:
-          python-version: "3.11"
+          node-version: 22
 
-      - name: Install dependencies
-        run: pip install mkdocs mkdocs-material
+      - name: Instalar dependencias
+        run: npm install
 
-      - name: Build site
-        run: mkdocs build
+      - name: Construir proyecto
+        run: npm run build
 
-      - name: Setup GitHub Pages
+      - name: Configurar GitHub Pages
         uses: actions/configure-pages@v5
 
-      - name: Upload artifact
+      - name: Subir artefacto
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./site
+          path: dist
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
+      - name: Publicar en GitHub Pages
         uses: actions/deploy-pages@v4
